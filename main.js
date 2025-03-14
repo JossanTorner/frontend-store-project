@@ -84,3 +84,28 @@ async function loadProducts(){
 }
 
 loadProducts();
+
+
+function displayCart(){
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+    let cartContainer = document.getElementById("cart");
+    cartContainer.innerHTML = "";
+    
+    cart.forEach(product => {
+        cartContainer.innerHTML += `
+        <li class="list-group-item">
+            ${product.title}
+            <button class="btn btn-danger btn-sm float-end" onclick="removeItem(${product.id})">X</button>
+        </li>`;
+    });
+}
+
+function removeItem(productId) {
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
+cart = cart.filter(product => product.id !== productId);
+localStorage.setItem("cart", JSON.stringify(cart));
+displayCart();
+}
+
+displayCart();
+
