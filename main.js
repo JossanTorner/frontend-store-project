@@ -49,15 +49,9 @@ async function fetchElectronic(){
 fetchElectronic()
 
 
-function addToCart(id, title, price, image){
-    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+//Products-page
 
-    cart.push({id, title, price, image});
-    localStorage.setItem("cart", JSON.stringify(cart));
-}
-
-
-async function loadProducts(){
+async function loadProductss(){
     let response = await fetch("https://fakestoreapi.com/products");
     let products = await response.json();
     let productsContainer = document.getElementById("products");
@@ -66,25 +60,46 @@ async function loadProducts(){
     products.forEach(product => {
         let productCard = document.createElement("div");
         productCard.classList.add("col");
-
         productCard.innerHTML = `
         <div class="card">
             <img src="${product.image}" class="card-img-top" alt="${product.title}" style="height: 200px; object-fit: contain;">
             <div class="card-body">
-                <h5 class="card-title">${product.title}</h5>
-                <p class="card-text">${product.description.substring(0, 100)}...</p>
+                <h3><a href="product.html?id=${product.id}">${product.title}</a></h3>
                 <p class="card-text"><strong>${product.price} $</strong></p>
-                <button class="btn btn-primary" onclick="addToCart(${product.id}, '${product.title}', ${product.price}, '${product.image}')">
-                    Lägg till i kundvagn
-                    </button>
             </div>
         </div>`;
         productsContainer.appendChild(productCard);
     });
 }
 
-loadProducts();
 
+loadProductss();
+
+function loadSingleProduct(){
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get("id");
+
+    fetch(`https://fakestoreapi.com/products/${productId}`).then(response => response.json()).then(product => {
+        document.getElementById("product-title").textContent = product.title;
+        document.getElementById("product-image").src = product.image;
+        document.getElementById("product-description").textContent = product.description;
+        document.getElementById("product-price").textContent = product.price;
+    })
+}
+
+loadSingleProduct();
+
+//Product-page
+
+function addToCart(id, title, price, image){
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+    cart.push({id, title, price, image});
+    localStorage.setItem("cart", JSON.stringify(cart));
+}
+
+
+//Shopping cart-page
 
 function displayCart(){
     let cart = JSON.parse(localStorage.getItem("cart")) || [];

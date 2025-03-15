@@ -1,0 +1,22 @@
+#products{
+    width: 80%;          /* Gör div bredden till 80% av skärmen */
+    margin: 0 auto;   
+}
+
+.footer-dark{
+    margin-top: 50px;
+    padding-top: 30px;
+    background-color: #dee3df;
+}
+
+#product-container{
+    margin: 0px 200px 0px 200px;
+}
+
+.product{
+    display: flex;
+}
+
+.product-details{
+    margin: 100px;
+}
