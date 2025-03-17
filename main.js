@@ -51,7 +51,7 @@ fetchElectronic()
 
 //Products-page
 
-async function loadProductss(){
+async function loadProducts(){
     let response = await fetch("https://fakestoreapi.com/products");
     let products = await response.json();
     let productsContainer = document.getElementById("products");
@@ -64,7 +64,7 @@ async function loadProductss(){
         <div class="card">
             <img src="${product.image}" class="card-img-top" alt="${product.title}" style="height: 200px; object-fit: contain;">
             <div class="card-body">
-                <h3><a href="product.html?id=${product.id}">${product.title}</a></h3>
+                <h3><a href="product.html?id=${product.id}" class="link-secondary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">${product.title}</a></h3>
                 <p class="card-text"><strong>${product.price} $</strong></p>
             </div>
         </div>`;
@@ -73,7 +73,7 @@ async function loadProductss(){
 }
 
 
-loadProductss();
+loadProducts();
 
 function loadSingleProduct(){
     const urlParams = new URLSearchParams(window.location.search);
@@ -83,7 +83,7 @@ function loadSingleProduct(){
         document.getElementById("product-title").textContent = product.title;
         document.getElementById("product-image").src = product.image;
         document.getElementById("product-description").textContent = product.description;
-        document.getElementById("product-price").textContent = product.price;
+        document.getElementById("product-price").textContent = product.price + "$";
     })
 }
 
@@ -116,11 +116,29 @@ function displayCart(){
 }
 
 function removeItem(productId) {
-let cart = JSON.parse(localStorage.getItem("cart")) || [];
-cart = cart.filter(product => product.id !== productId);
-localStorage.setItem("cart", JSON.stringify(cart));
-displayCart();
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+    cart = cart.filter(product => product.id !== productId);
+    localStorage.setItem("cart", JSON.stringify(cart));
+    displayCart();
 }
+
+document.addEventListener("DOMContentLoaded", displayCart);
+
+document.addEventListener("DOMContentLoaded", function () {
+    let addToCartButton = document.getElementById('add-to-cart-button');
+
+    if (addToCartButton != null) {
+        addToCartButton.addEventListener('click', function () {
+            let productId = new URLSearchParams(window.location.search).get("id");
+            let title = document.getElementById("product-title").textContent;
+            let price = document.getElementById("product-price").textContent.replace("$", "");
+            let image = document.getElementById("product-image").src;
+
+            addToCart(productId, title, price, image);
+            displayCart();
+        });
+    }
+});
 
 displayCart();
 
