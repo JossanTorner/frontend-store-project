@@ -1,52 +1,3 @@
-async function fetchJewelery(){
-    let response = await fetch("https://fakestoreapi.com/products/category/jewelery")
-    let products = await response.json();
-
-    let randomIndex = Math.floor(Math.random() * products.length);
-    let randomProduct = products[randomIndex];
-    
-    document.getElementById("jewelery").src = randomProduct.image;
-
-}
-fetchJewelery();
-
-async function fetchWomenShirt(){
-    let response = await fetch("https://fakestoreapi.com/products/category/women's clothing")
-    let products = await response.json();
-
-    let randomIndex = Math.floor(Math.random() * products.length);
-    let randomProduct = products[randomIndex];
-    
-    document.getElementById("women-shirt-image").src = randomProduct.image;
-
-}
-fetchWomenShirt();
-
-async function fetchMensShirt(){
-    let response = await fetch("https://fakestoreapi.com/products/category/men's clothing")
-    let products = await response.json();
-
-    let randomIndex = Math.floor(Math.random() * products.length);
-    let randomProduct = products[randomIndex];
-    
-    document.getElementById("mens-shirt-image").src = randomProduct.image;
-
-}
-
-fetchMensShirt();
-
-async function fetchElectronic(){
-    let response = await fetch("https://fakestoreapi.com/products/category/electronics")
-    let products = await response.json();
-
-    let randomIndex = Math.floor(Math.random() * products.length);
-    let randomProduct = products[randomIndex];
-    
-    document.getElementById("electronic").src = randomProduct.image;
-
-}
-
-fetchElectronic()
 
 
 //Products-page
@@ -64,7 +15,7 @@ async function loadProducts(){
         <div class="card">
             <img src="${product.image}" class="card-img-top" alt="${product.title}" style="height: 200px; object-fit: contain;">
             <div class="card-body">
-                <h3><a href="product.html?id=${product.id}" class="link-secondary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">${product.title}</a></h3>
+                <h4><a href="product.html?id=${product.id}" class="link-secondary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">${product.title}</a></h3>
                 <p class="card-text"><strong>${product.price} $</strong></p>
             </div>
         </div>`;
@@ -75,6 +26,7 @@ async function loadProducts(){
 
 loadProducts();
 
+//Product-page
 function loadSingleProduct(){
     const urlParams = new URLSearchParams(window.location.search);
     const productId = urlParams.get("id");
@@ -89,40 +41,101 @@ function loadSingleProduct(){
 
 loadSingleProduct();
 
-//Product-page
-
-function addToCart(id, title, price, image){
+// Lägger produkt i localstorage
+function addToStorage(id, title, price, image, quantity) {
     let cart = JSON.parse(localStorage.getItem("cart")) || [];
-
-    cart.push({id, title, price, image});
+    let existingProduct = cart.find(product => product.id === id);
+    
+    if (existingProduct) {
+        existingProduct.quantity += quantity;
+    } else {
+        cart.push({ id, title, price, image, quantity});
+    }
     localStorage.setItem("cart", JSON.stringify(cart));
+
+    loadCart();
 }
+
+
 
 
 //Shopping cart-page
 
-function displayCart(){
+function loadCart(){
     let cart = JSON.parse(localStorage.getItem("cart")) || [];
-    let cartContainer = document.getElementById("cart");
-    cartContainer.innerHTML = "";
+    let shoppingCart = document.getElementById("shopping-cart");
+    shoppingCart.innerHTML = "";
+    let totalPrice = document.getElementById("total");
+    let currentTotal = 0;
     
     cart.forEach(product => {
-        cartContainer.innerHTML += `
-        <li class="list-group-item">
-            ${product.title}
-            <button class="btn btn-danger btn-sm float-end" onclick="removeItem(${product.id})">X</button>
-        </li>`;
+        let price = parseFloat(product.price);
+        shoppingCart.innerHTML += `<div>
+                <div class="list-group list-unstyled">
+                  <div class="d-flex align-items-center">
+                    <img src="${product.image}" class="img-fluid mx-3"  style="width: 150px;" alt="${product.title}">
+                    <div class="d-flex flex-column">
+                      <h5 class="m-3">${product.title}</h5>
+                      <p class="mx-3">${price} $</p>
+                    </div>
+                    <div class="d-flex align-items-center">
+                      <button class="btn btn-outline-primary" data-id="${product.id}" onclick="quantityMinus(event)">−</button>
+                      <input type="number" id="${product.id}" value="${product.quantity}" min="1" class="form-control text-center mx-2" style="width: 60px;">
+                      <button class="btn btn-outline-primary" data-id="${product.id}" onclick="quantityPlus(event)">+</button>
+                    </div>
+                   </div>
+                 </div>
+              </div>`;
+
+                currentTotal+= price * parseFloat(product.quantity);
     });
+
+    totalPrice.textContent = currentTotal.toFixed(2) + "$";
 }
 
 function removeItem(productId) {
     let cart = JSON.parse(localStorage.getItem("cart")) || [];
     cart = cart.filter(product => product.id !== productId);
     localStorage.setItem("cart", JSON.stringify(cart));
-    displayCart();
+    loadCart();
 }
 
-document.addEventListener("DOMContentLoaded", displayCart);
+function quantityPlus(event){
+    let clickedButton = event.target;
+    let productId = clickedButton.getAttribute("data-id");
+    let currentQuantity = document.getElementById(productId);
+    currentQuantity.value = parseInt(currentQuantity.value) + 1;
+
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+    let product = cart.find(product => product.id === productId);
+    if (product) {
+        product.quantity = parseInt(currentQuantity.value);  // Uppdatera kvantiteten för produkten
+        localStorage.setItem("cart", JSON.stringify(cart));  // Spara tillbaka till localStorage
+    }
+    loadCart(); 
+}
+
+function quantityMinus(event){
+    let clickedButton = event.target;
+    let productId = clickedButton.getAttribute("data-id");
+    let currentQuantity = document.getElementById(productId);
+    if (parseInt(currentQuantity.value) > 1) {
+        currentQuantity.value = parseInt(currentQuantity.value) - 1;
+        loadCart();
+    }
+    else{
+        removeFromCart(productId);
+    }
+}
+
+function removeFromCart(productId){
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+    cart = cart.filter(product => product.id !== productId);
+    localStorage.setItem("cart", JSON.stringify(cart));
+    loadCart();
+}
+
+document.addEventListener("DOMContentLoaded", loadCart);
 
 document.addEventListener("DOMContentLoaded", function () {
     let addToCartButton = document.getElementById('add-to-cart-button');
@@ -134,12 +147,10 @@ document.addEventListener("DOMContentLoaded", function () {
             let price = document.getElementById("product-price").textContent.replace("$", "");
             let image = document.getElementById("product-image").src;
 
-            addToCart(productId, title, price, image);
-            displayCart();
+            addToStorage(productId, title, price, image, 1);
+            loadCart();
         });
     }
 });
-
-displayCart();
 
 

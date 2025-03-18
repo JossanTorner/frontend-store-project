@@ -8,68 +8,81 @@
     <link href="style.css" rel="stylesheet">
 </head>
 <body>
-    
-    <nav class="navbar navbar-expand-lg bg-body-tertiary">
-        <div class="container-fluid">
-          <a class="navbar-brand" href="#">Fake shop</a>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-          </button>
-          <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav">
-              <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="index.html">Home</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="products.html">Shop</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="cart.html">Shopping cart</a>
-              </li>
-            </ul>
-          </div>
-        </div>
-    </nav>
+  <div class="vh-100 vw-100 row px-0 mx-0">
 
-    <div class="card" style="width: 18rem;">
-        <div class="card-header">
-            Shopping cart
+    <nav class="col-12 navbar navbar-expand-lg bg-body-tertiary">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">Fake shop</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="index.html">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="index.html">Shop</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="cart.html">Shopping cart</a>
+            </li>
+          </ul>
         </div>
-        <ul class="list-group list-group-flush" id="cart"></ul>
-        <div class="card-footer text-center">
-            <button class="btn btn-success mt-2" onclick="placeOrder()">Lägg order</button>
-        </div>
-    </div>
+      </div>
+  </nav>
 
-
-    <div class="footer-dark">
-      <footer>
-          <div class="footer-container">
-              <div class="row">
-                  <div class="col-sm-6 col-md-3 item">
-                      <h3>Services</h3>
-                      <ul>
-                          <li><a href="#" class="nav-link active">Web design</a></li>
-                          <li><a href="#" class="nav-link active">Development</a></li>
-                          <li><a href="#" class="nav-link active">Hosting</a></li>
-                      </ul>
-                  </div>
-                  <div class="col-sm-6 col-md-3 item">
-                      <h3>About</h3>
-                      <ul>
-                          <li><a href="#">Company</a></li>
-                          <li><a href="#">Team</a></li>
-                          <li><a href="#">Careers</a></li>
-                      </ul>
-                  </div>
-                  <div class="col-md-6 item text">
-                      <h3>Company Name</h3>
-                      <p>Praesent sed lobortis mi. Suspendisse vel placerat ligula. Vivamus ac sem lacus. Ut vehicula rhoncus elementum. Etiam quis tristique lectus. Aliquam in arcu eget velit pulvinar dictum vel in justo.</p>
-                  </div>
+  <section class="h-100 h-custom" style="background-color: #eee;">
+    <div class="container h-100 py-5">
+      <div class="row d-flex justify-content-center align-items-center h-100">
+        <div class="col-lg-8">
+          <div class="card" style="border-radius: 15px;">
+            <div class="card-body">
+              <h3 class="mb-5 pt-2 text-center fw-bold text-uppercase">Shopping cart</h3>
+              <div id="shopping-cart"></div>
+              <div class="d-flex justify-content-between p-2 mb-2 bg-light">
+                <h5 class="fw-bold mb-0">Total:</h5>
+                <h5 class="fw-bold mb-0" id="total"></h5>
+              </div>
+              <button type="button" class="btn btn-secondary btn-block btn-lg">Proceed to Checkout</button>
             </div>
-              <p class="copyright">Company Name © 2018</p>
           </div>
-      </footer>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="col-12 bg-dark text-white text-center py-3 mt-auto">
+    <div class="container">
+      <div class="row">
+        <div class="col text-start">
+          <h5 class="mb-3" style="letter-spacing: 2px; color: #818963;">footer content</h5>
+          <p>
+            Lorem ipsum dolor sit amet consectetur, adipisicing elit. Iste atque ea quis
+            molestias. Fugiat pariatur maxime quis culpa corporis vitae repudiandae aliquam
+            voluptatem veniam, est atque cumque eum delectus sint!
+          </p>
+        </div>
+        <div class="col text-start">
+          <h5 class="mb-3" style="letter-spacing: 2px; color: #818963;">links</h5>
+          <ul class="list-unstyled mb-0">
+            <li class="mb-1">
+              <a href="#!" style="color: #4f4f4f;">Frequently Asked Questions</a>
+            </li>
+            <li class="mb-1">
+              <a href="#!" style="color: #4f4f4f;">Delivery</a>
+            </li>
+            <li class="mb-1">
+              <a href="#!" style="color: #4f4f4f;">Pricing</a>
+            </li>
+            <li>
+              <a href="#!" style="color: #4f4f4f;">Where we deliver?</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <p class="py-3"> © 2025 Mitt Företag - Alla rättigheter förbehållna</p>
+  </footer>
   </div>
     <script src="main.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>

@@ -1,10 +1,4 @@
 #products{
-    width: 80%;          /* Gör div bredden till 80% av skärmen */
+    width: 80%;
     margin: 0 auto;   
-}
-
-.footer-dark{
-    margin-top: 50px;
-    padding-top: 30px;
-    background-color: #dee3df;
 }
