@@ -1,30 +1,71 @@
 
+document.addEventListener("DOMContentLoaded", loadCart);
+document.addEventListener("DOMContentLoaded", loadProducts)
+document.addEventListener("DOMContentLoaded", loadSingleProduct)
+
+function createHTMLProduct(product){
+    return   `
+    <div class="col">
+        <div class="card">
+            <img src="${product.image}" class="card-img-top" alt="${product.title}" style="height: 200px; object-fit: contain;">
+            <div class="card-body">
+                <h4><a href="product.html?id=${product.id}" class="link-secondary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">${product.title}</a></h4>
+                <p class="card-text"><strong>${product.price} $</strong></p>
+            </div>
+        </div>
+    </div>`;
+}
+
+function createHTMLCartProduct(product){
+    return `<div>
+                <div class="list-group list-unstyled">
+                  <div class="d-flex">
+                    <img src="${product.image}" class="img-fluid m-3"  style="width: 150px;" alt="${product.title}">
+                    <div class="d-flex flex-column">
+                      <h5 class="m-3">${product.title}</h5>
+                      <p class="mx-3">${product.price} $</p>
+                    </div>
+                    <div class="d-flex align-items-center  ms-auto">
+                      <button class="btn btn-outline-primary" data-id="${product.id}" onclick="quantityMinus(event)">−</button>
+                      <input type="number" id="${product.id}" value="${product.quantity}" min="1" class="form-control text-center mx-2" style="width: 60px;">
+                      <button class="btn btn-outline-primary" data-id="${product.id}" onclick="quantityPlus(event)">+</button>
+                    </div>
+                   </div>
+                 </div>
+              </div>`;
+}
+
+function createHTMLCartProductt(product){
+    return `<div>
+                <div class="list-group list-unstyled">
+                  <div class="d-flex align-items-center">
+                    <img src="${product.image}" class="img-fluid m-3"  style="width: 150px;" alt="${product.title}">
+                    <div class="d-flex flex-column">
+                      <h5 class="m-3">${product.title}</h5>
+                      <p class="mx-3" id="unit-price">Unit price: ${product.price} $</p>
+                      <p class="mx-3" id="total-for-product-${product.id}"></p>
+                    </div>
+                    <div class="d-flex align-items-center  ms-auto">
+                      <button class="btn btn-outline-primary" data-id="${product.id}" onclick="quantityMinus(event)">−</button>
+                      <input type="number" id="${product.id}" value="${product.quantity}" min="1" class="form-control text-center mx-2" style="width: 60px;" readOnly>
+                      <button class="btn btn-outline-primary" data-id="${product.id}" onclick="quantityPlus(event)">+</button>
+                    </div>
+                   </div>
+                 </div>
+              </div>`;
+}
+
 
 //Products-page
-
 async function loadProducts(){
     let response = await fetch("https://fakestoreapi.com/products");
     let products = await response.json();
     let productsContainer = document.getElementById("products");
 
-
     products.forEach(product => {
-        let productCard = document.createElement("div");
-        productCard.classList.add("col");
-        productCard.innerHTML = `
-        <div class="card">
-            <img src="${product.image}" class="card-img-top" alt="${product.title}" style="height: 200px; object-fit: contain;">
-            <div class="card-body">
-                <h4><a href="product.html?id=${product.id}" class="link-secondary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">${product.title}</a></h3>
-                <p class="card-text"><strong>${product.price} $</strong></p>
-            </div>
-        </div>`;
-        productsContainer.appendChild(productCard);
+        productsContainer.innerHTML += createHTMLProduct(product);
     });
 }
-
-
-loadProducts();
 
 //Product-page
 function loadSingleProduct(){
@@ -39,13 +80,33 @@ function loadSingleProduct(){
     })
 }
 
-loadSingleProduct();
+//Shopping cart-page
+function loadCart(){
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+    let cartElement = document.getElementById("shopping-cart");
+
+    cartElement.innerHTML = "";
+    let currentTotal = 0;
+    
+    cart.forEach(product => {
+        cartElement.innerHTML += createHTMLCartProductt(product);
+        document.getElementById(`total-for-product-${product.id}`).textContent = "Total: " + 
+        (parseFloat(product.price) * parseFloat(product.quantity)).toFixed(2) + " $";
+        currentTotal+= parseFloat(product.price) * parseFloat(product.quantity);
+    });
+
+    document.getElementById("total").textContent = currentTotal.toFixed(2) + "$";
+}
 
 // Lägger produkt i localstorage
 function addToStorage(id, title, price, image, quantity) {
+    // hämtar storage
     let cart = JSON.parse(localStorage.getItem("cart")) || [];
+    // kollar om produkten som läggs till redan finns där
     let existingProduct = cart.find(product => product.id === id);
     
+    // om produkten finns, lägg ej till men öka quantity
+    // annars pusha till storage
     if (existingProduct) {
         existingProduct.quantity += quantity;
     } else {
@@ -57,75 +118,37 @@ function addToStorage(id, title, price, image, quantity) {
 }
 
 
-
-
-//Shopping cart-page
-
-function loadCart(){
-    let cart = JSON.parse(localStorage.getItem("cart")) || [];
-    let shoppingCart = document.getElementById("shopping-cart");
-    shoppingCart.innerHTML = "";
-    let totalPrice = document.getElementById("total");
-    let currentTotal = 0;
-    
-    cart.forEach(product => {
-        let price = parseFloat(product.price);
-        shoppingCart.innerHTML += `<div>
-                <div class="list-group list-unstyled">
-                  <div class="d-flex align-items-center">
-                    <img src="${product.image}" class="img-fluid mx-3"  style="width: 150px;" alt="${product.title}">
-                    <div class="d-flex flex-column">
-                      <h5 class="m-3">${product.title}</h5>
-                      <p class="mx-3">${price} $</p>
-                    </div>
-                    <div class="d-flex align-items-center">
-                      <button class="btn btn-outline-primary" data-id="${product.id}" onclick="quantityMinus(event)">−</button>
-                      <input type="number" id="${product.id}" value="${product.quantity}" min="1" class="form-control text-center mx-2" style="width: 60px;">
-                      <button class="btn btn-outline-primary" data-id="${product.id}" onclick="quantityPlus(event)">+</button>
-                    </div>
-                   </div>
-                 </div>
-              </div>`;
-
-                currentTotal+= price * parseFloat(product.quantity);
-    });
-
-    totalPrice.textContent = currentTotal.toFixed(2) + "$";
-}
-
-function removeItem(productId) {
-    let cart = JSON.parse(localStorage.getItem("cart")) || [];
-    cart = cart.filter(product => product.id !== productId);
-    localStorage.setItem("cart", JSON.stringify(cart));
-    loadCart();
-}
-
 function quantityPlus(event){
     let clickedButton = event.target;
     let productId = clickedButton.getAttribute("data-id");
     let currentQuantity = document.getElementById(productId);
     currentQuantity.value = parseInt(currentQuantity.value) + 1;
-
-    let cart = JSON.parse(localStorage.getItem("cart")) || [];
-    let product = cart.find(product => product.id === productId);
-    if (product) {
-        product.quantity = parseInt(currentQuantity.value);  // Uppdatera kvantiteten för produkten
-        localStorage.setItem("cart", JSON.stringify(cart));  // Spara tillbaka till localStorage
-    }
+    updateQuantityInStorage(currentQuantity.value, productId)
     loadCart(); 
 }
+
 
 function quantityMinus(event){
     let clickedButton = event.target;
     let productId = clickedButton.getAttribute("data-id");
     let currentQuantity = document.getElementById(productId);
-    if (parseInt(currentQuantity.value) > 1) {
+    if (parseInt(currentQuantity.value) >1) {
         currentQuantity.value = parseInt(currentQuantity.value) - 1;
-        loadCart();
+        updateQuantityInStorage(currentQuantity.value, productId)
     }
     else{
         removeFromCart(productId);
     }
+    loadCart();
+}
+
+function updateQuantityInStorage(newQuantity, productId){
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+        let product = cart.find(product => product.id === productId);
+        if (product) {
+            product.quantity = parseInt(newQuantity);
+            localStorage.setItem("cart", JSON.stringify(cart));
+        }
 }
 
 function removeFromCart(productId){
@@ -134,8 +157,6 @@ function removeFromCart(productId){
     localStorage.setItem("cart", JSON.stringify(cart));
     loadCart();
 }
-
-document.addEventListener("DOMContentLoaded", loadCart);
 
 document.addEventListener("DOMContentLoaded", function () {
     let addToCartButton = document.getElementById('add-to-cart-button');
