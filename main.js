@@ -7,7 +7,7 @@ function createHTMLProduct(product){
     return   `
     <div class="col">
         <div class="card">
-            <img src="${product.image}" class="card-img-top" alt="${product.title}" style="height: 200px; object-fit: contain;">
+            <img src="${product.image}" class="card-img-top my-4" alt="${product.title}" style="height: 200px; object-fit: contain;">
             <div class="card-body">
                 <h4><a href="product.html?id=${product.id}" class="link-secondary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">${product.title}</a></h4>
                 <p class="card-text"><strong>${product.price} $</strong></p>
@@ -17,50 +17,57 @@ function createHTMLProduct(product){
 }
 
 function createHTMLCartProduct(product){
-    return `<div>
-                <div class="list-group list-unstyled">
-                  <div class="d-flex">
-                    <img src="${product.image}" class="img-fluid m-3"  style="width: 150px;" alt="${product.title}">
-                    <div class="d-flex flex-column">
-                      <h5 class="m-3">${product.title}</h5>
-                      <p class="mx-3">${product.price} $</p>
-                    </div>
-                    <div class="d-flex align-items-center  ms-auto">
-                      <button class="btn btn-outline-primary" data-id="${product.id}" onclick="quantityMinus(event)">−</button>
-                      <input type="number" id="${product.id}" value="${product.quantity}" min="1" class="form-control text-center mx-2" style="width: 60px;">
-                      <button class="btn btn-outline-primary" data-id="${product.id}" onclick="quantityPlus(event)">+</button>
-                    </div>
-                   </div>
-                 </div>
-              </div>`;
-}
+    return `<div class="list-group list-unstyled">
+                <div class="d-flex flex-column flex-md-row align-items-center border-bottom">
 
-function createHTMLCartProductt(product){
-    return `<div>
-                <div class="list-group list-unstyled">
-                  <div class="d-flex align-items-center">
                     <img src="${product.image}" class="img-fluid m-3"  style="width: 150px;" alt="${product.title}">
-                    <div class="d-flex flex-column">
+
+                    <div class="d-flex flex-column flex-grow-1">
                       <h5 class="m-3">${product.title}</h5>
                       <p class="mx-3" id="unit-price">Unit price: ${product.price} $</p>
                       <p class="mx-3" id="total-for-product-${product.id}"></p>
                     </div>
-                    <div class="d-flex align-items-center  ms-auto">
+
+                    <div class="d-flex align-items-center justify-content-center my-3 mx-md-3">
                       <button class="btn btn-outline-primary" data-id="${product.id}" onclick="quantityMinus(event)">−</button>
-                      <input type="number" id="${product.id}" value="${product.quantity}" min="1" class="form-control text-center mx-2" style="width: 60px;" readOnly>
+                      <input type="text" id="${product.id}" value="${product.quantity}" min="1" class="form-control text-center mx-2" style="width: 60px;" readOnly>
                       <button class="btn btn-outline-primary" data-id="${product.id}" onclick="quantityPlus(event)">+</button>
                     </div>
-                   </div>
-                 </div>
-              </div>`;
+
+                </div>
+            </div>`;
+}
+
+
+class Item {
+    constructor(id, title, price, description, image){
+        this.id = id;
+        this.title = title;
+        this.price = price;
+        this.description = description;
+        this.image = image;
+    }
+}
+
+async function fetchProducts(){
+    return await fetch("https://fakestoreapi.com/products").then(response => response.json()).then(json => json.map(jsonObject => 
+        new Item(jsonObject.id, 
+                jsonObject.title, 
+                jsonObject.price, 
+                jsonObject.description,
+                jsonObject.image)));
+}
+
+async function fetchProductById(productId) {
+    const products = await fetchProducts(); // Hämta alla produkter
+    return products.find(product => product.id === Number(productId)); // Hitta produkten med rätt ID
 }
 
 
 //Products-page
 async function loadProducts(){
-    let response = await fetch("https://fakestoreapi.com/products");
-    let products = await response.json();
     let productsContainer = document.getElementById("products");
+    const products = await fetchProducts();
 
     products.forEach(product => {
         productsContainer.innerHTML += createHTMLProduct(product);
@@ -68,11 +75,11 @@ async function loadProducts(){
 }
 
 //Product-page
-function loadSingleProduct(){
+async function loadSingleProduct(){
     const urlParams = new URLSearchParams(window.location.search);
     const productId = urlParams.get("id");
 
-    fetch(`https://fakestoreapi.com/products/${productId}`).then(response => response.json()).then(product => {
+    fetchProductById(productId).then(product => {
         document.getElementById("product-title").textContent = product.title;
         document.getElementById("product-image").src = product.image;
         document.getElementById("product-description").textContent = product.description;
@@ -89,7 +96,7 @@ function loadCart(){
     let currentTotal = 0;
     
     cart.forEach(product => {
-        cartElement.innerHTML += createHTMLCartProductt(product);
+        cartElement.innerHTML += createHTMLCartProduct(product);
         document.getElementById(`total-for-product-${product.id}`).textContent = "Total: " + 
         (parseFloat(product.price) * parseFloat(product.quantity)).toFixed(2) + " $";
         currentTotal+= parseFloat(product.price) * parseFloat(product.quantity);
@@ -98,15 +105,10 @@ function loadCart(){
     document.getElementById("total").textContent = currentTotal.toFixed(2) + "$";
 }
 
-// Lägger produkt i localstorage
 function addToStorage(id, title, price, image, quantity) {
-    // hämtar storage
     let cart = JSON.parse(localStorage.getItem("cart")) || [];
-    // kollar om produkten som läggs till redan finns där
     let existingProduct = cart.find(product => product.id === id);
     
-    // om produkten finns, lägg ej till men öka quantity
-    // annars pusha till storage
     if (existingProduct) {
         existingProduct.quantity += quantity;
     } else {
