@@ -1,9 +1,8 @@
 
 document.addEventListener("DOMContentLoaded", loadCart);
 document.addEventListener("DOMContentLoaded", loadProducts)
-document.addEventListener("DOMContentLoaded", loadSingleProduct)
 
-function createHTMLProduct(product){
+function createHTMLProducts(product){
     return   `
     <div class="col">
         <div class="card">
@@ -11,9 +10,36 @@ function createHTMLProduct(product){
             <div class="card-body">
                 <h4><a href="product.html?id=${product.id}" class="link-secondary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">${product.title}</a></h4>
                 <p class="card-text"><strong>${product.price} $</strong></p>
+                <div>
+                    <button type="button" 
+                    class="btn btn-secondary mt-2 add-to-cart-button" 
+                    onclick="addToStorage(${product.id}, '${product.title}', ${product.price}, '${product.image}', 1)">
+                    Add to cart</button>
+                </div>
             </div>
         </div>
     </div>`;
+}
+
+function createHTMLSingleProductPage(product){
+    return `<div class="row justify-content-center">
+                                         <div class="col-lg-4 col-12 p-4">
+                                             <div class="image-container">
+                                                 <img src="${product.image}" class="img-fluid" id="product-image" alt="...">
+                                             </div>
+                                        </div>
+                                        <div class="col-lg-4 col-12 p-4">
+                                        <div class="product-details">
+                                            <div id="product-title" class="h5">${product.title}</div>
+                                            <div id="product-description">${product.description}</div>
+                                            <div id="product-price">${product.price}</div>
+                                            <div id="product-button">
+                                                <button type="button" class="btn btn-secondary mt-2"
+                                                onclick="addToStorage(${product.id}, '${product.title}', ${product.price}, '${product.image}', 1)">Add to cart</button>
+                                            </div>
+                                        </div>
+                                        </div>
+                                    </div>`;
 }
 
 function createHTMLCartProduct(product){
@@ -70,22 +96,10 @@ async function loadProducts(){
     const products = await fetchProducts();
 
     products.forEach(product => {
-        productsContainer.innerHTML += createHTMLProduct(product);
+        productsContainer.innerHTML += createHTMLProducts(product);
     });
 }
 
-//Product-page
-async function loadSingleProduct(){
-    const urlParams = new URLSearchParams(window.location.search);
-    const productId = urlParams.get("id");
-
-    fetchProductById(productId).then(product => {
-        document.getElementById("product-title").textContent = product.title;
-        document.getElementById("product-image").src = product.image;
-        document.getElementById("product-description").textContent = product.description;
-        document.getElementById("product-price").textContent = product.price + "$";
-    })
-}
 
 //Shopping cart-page
 function loadCart(){
@@ -123,25 +137,32 @@ function addToStorage(id, title, price, image, quantity) {
 function quantityPlus(event){
     let clickedButton = event.target;
     let productId = clickedButton.getAttribute("data-id");
-    let currentQuantity = document.getElementById(productId);
-    currentQuantity.value = parseInt(currentQuantity.value) + 1;
-    updateQuantityInStorage(currentQuantity.value, productId)
-    loadCart(); 
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+    let productToUpdate = cart.find(product => product.id == productId);
+    
+    if (productToUpdate) {
+        productToUpdate.quantity += 1;
+        localStorage.setItem("cart", JSON.stringify(cart));
+        loadCart(); 
+    }
 }
-
 
 function quantityMinus(event){
     let clickedButton = event.target;
     let productId = clickedButton.getAttribute("data-id");
-    let currentQuantity = document.getElementById(productId);
-    if (parseInt(currentQuantity.value) >1) {
-        currentQuantity.value = parseInt(currentQuantity.value) - 1;
-        updateQuantityInStorage(currentQuantity.value, productId)
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+    let productToUpdate = cart.find(product => product.id == productId);
+    
+    if (productToUpdate) {
+        if (productToUpdate.quantity > 1) {
+            productToUpdate.quantity -= 1;
+            localStorage.setItem("cart", JSON.stringify(cart));
+        } else {
+            cart = cart.filter(product => product.id != productId);
+            localStorage.setItem("cart", JSON.stringify(cart));
+        }
+        loadCart(); 
     }
-    else{
-        removeFromCart(productId);
-    }
-    loadCart();
 }
 
 function updateQuantityInStorage(newQuantity, productId){
@@ -160,20 +181,15 @@ function removeFromCart(productId){
     loadCart();
 }
 
-document.addEventListener("DOMContentLoaded", function () {
-    let addToCartButton = document.getElementById('add-to-cart-button');
 
-    if (addToCartButton != null) {
-        addToCartButton.addEventListener('click', function () {
-            let productId = new URLSearchParams(window.location.search).get("id");
-            let title = document.getElementById("product-title").textContent;
-            let price = document.getElementById("product-price").textContent.replace("$", "");
-            let image = document.getElementById("product-image").src;
+//Single product page
+document.addEventListener("DOMContentLoaded", function() {
+    const params = new URLSearchParams(window.location.search);
+    const productId = params.get("id");
+    let productContainer = document.getElementById("product-container");
 
-            addToStorage(productId, title, price, image, 1);
-            loadCart();
-        });
-    }
+    fetchProductById(productId).then(product => {
+        productContainer.innerHTML += createHTMLSingleProductPage(product);
+    });
+
 });
-
-
