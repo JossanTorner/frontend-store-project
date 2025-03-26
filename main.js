@@ -12,7 +12,7 @@ function createHTMLProducts(product){
                 <p class="card-text"><strong>${product.price} $</strong></p>
                 <div>
                     <button type="button" 
-                    class="btn btn-secondary mt-2 add-to-cart-button" 
+                    class="btn btn-secondary mt-2" 
                     onclick="addToStorage(${product.id}, '${product.title}', ${product.price}, '${product.image}', 1)">
                     Add to cart</button>
                 </div>
@@ -56,7 +56,7 @@ function createHTMLCartProduct(product){
 
                     <div class="d-flex align-items-center justify-content-center my-3 mx-md-3">
                       <button class="btn btn-outline-primary" data-id="${product.id}" onclick="quantityMinus(event)">−</button>
-                      <input type="text" id="${product.id}" value="${product.quantity}" min="1" class="form-control text-center mx-2" style="width: 60px;" readOnly>
+                      <input type="text" value="${product.quantity}" min="1" class="form-control text-center mx-2" style="width: 60px;" readOnly>
                       <button class="btn btn-outline-primary" data-id="${product.id}" onclick="quantityPlus(event)">+</button>
                     </div>
 
@@ -163,15 +163,6 @@ function quantityMinus(event){
         }
         loadCart(); 
     }
-}
-
-function updateQuantityInStorage(newQuantity, productId){
-    let cart = JSON.parse(localStorage.getItem("cart")) || [];
-        let product = cart.find(product => product.id === productId);
-        if (product) {
-            product.quantity = parseInt(newQuantity);
-            localStorage.setItem("cart", JSON.stringify(cart));
-        }
 }
 
 function removeFromCart(productId){

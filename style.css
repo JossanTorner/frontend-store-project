@@ -2,3 +2,39 @@
     width: 80%;
     margin: 0 auto;   
 }
+
+
+#cart-count{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 12px;
+    font-weight: 500;
+    color: white;
+
+    position: absolute;
+    border: solid gray;
+    border-radius: 50%;
+    height: 18px;
+    width: 18px;
+    background: gray;
+
+    top: -2px;
+    right: -8px;
+
+}
+
+@media (min-width: 576px) {
+    #cart-count {
+        top: 0;
+        right: 0;
+    }
+}
+
+#cart-container{
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    width: auto;
+}
