@@ -1,20 +1,33 @@
 
-document.addEventListener("DOMContentLoaded", loadCart);
-document.addEventListener("DOMContentLoaded", loadProducts)
-document.addEventListener("DOMContentLoaded", updateCartCount);
+document.addEventListener("DOMContentLoaded", () => {
+    const path = window.location.pathname;
+
+    if (path.includes("cart.html")) {
+        loadCartPage();
+    } else if (path.includes("product.html")) {
+        loadSingleProductPage();
+    } else if (path.includes("index.html")) {
+        loadProductsPage();
+    }
+
+    updateNavbarCartCount();
+});
+
+// HTML-cards
 
 function createHTMLProducts(product){
     return   `
     <div class="col">
         <div class="card">
-            <img src="${product.image}" class="card-img-top my-4" alt="${product.title}" style="height: 200px; object-fit: contain;">
+            <img src="${product.image}"
+             class="card-img-top my-4" alt="${product.title}" style="height: 200px; object-fit: contain;">
             <div class="card-body">
-                <h4><a href="product.html?id=${product.id}" class="link-secondary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">${product.title}</a></h4>
+                <h4><a href="product.html?id=${product.id}" 
+                class="link-secondary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">
+                ${product.title}</a></h4>
                 <p class="card-text"><strong>${product.price} $</strong></p>
                 <div>
-                    <button type="button" 
-                    class="btn btn-secondary mt-2" 
-                    onclick="addToStorage(${product.id}, '${product.title}', ${product.price}, '${product.image}', 1)">
+                    <button type="button" class="btn btn-secondary mt-2" onclick="addToStorage(${product.id}, '${product.title}', ${product.price}, '${product.image}', 1)">
                     Add to cart</button>
                 </div>
             </div>
@@ -22,7 +35,7 @@ function createHTMLProducts(product){
     </div>`;
 }
 
-function createHTMLSingleProductPage(product){
+function createHTMLSingleProduct(product){
     return `<div class="row justify-content-center">
                                          <div class="col-lg-4 col-12 p-4">
                                              <div class="image-container">
@@ -36,7 +49,8 @@ function createHTMLSingleProductPage(product){
                                             <div id="product-price">${product.price}</div>
                                             <div id="product-button">
                                                 <button type="button" class="btn btn-secondary mt-2"
-                                                onclick="addToStorage(${product.id}, '${product.title}', ${product.price}, '${product.image}', 1)">Add to cart</button>
+                                                onclick="addToStorage(${product.id}, '${product.title}', ${product.price}, '${product.image}', 1)">
+                                                Add to cart</button>
                                             </div>
                                         </div>
                                         </div>
@@ -56,9 +70,9 @@ function createHTMLCartProduct(product){
                     </div>
 
                     <div class="d-flex align-items-center justify-content-center my-3 mx-md-3">
-                      <button class="btn btn-outline-primary" data-id="${product.id}" onclick="quantityMinus(event)">−</button>
+                      <button class="btn btn-outline-primary" onclick="quantityMinus(${product.id})">−</button>
                       <input type="text" value="${product.quantity}" min="1" class="form-control text-center mx-2" style="width: 60px;" readOnly>
-                      <button class="btn btn-outline-primary" data-id="${product.id}" onclick="quantityPlus(event)">+</button>
+                      <button class="btn btn-outline-primary" onclick="quantityPlus(${product.id})">+</button>
                     </div>
 
                 </div>
@@ -66,48 +80,47 @@ function createHTMLCartProduct(product){
 }
 
 
-class Item {
-    constructor(id, title, price, description, image){
-        this.id = id;
-        this.title = title;
-        this.price = price;
-        this.description = description;
-        this.image = image;
-    }
-}
-
 async function fetchProducts(){
-    return await fetch("https://fakestoreapi.com/products").then(response => response.json()).then(json => json.map(jsonObject => 
-        new Item(jsonObject.id, 
-                jsonObject.title, 
-                jsonObject.price, 
-                jsonObject.description,
-                jsonObject.image)));
+    return await fetch("https://fakestoreapi.com/products")
+        .then(response => response.json());
 }
 
 async function fetchProductById(productId) {
-    const products = await fetchProducts(); // Hämta alla produkter
-    return products.find(product => product.id === Number(productId)); // Hitta produkten med rätt ID
+    const products = await fetchProducts();
+    return products.find(product => product.id === Number(productId));
 }
 
-
 //Products-page
-async function loadProducts(){
+
+async function loadProductsPage(){
     let productsContainer = document.getElementById("products");
     const products = await fetchProducts();
 
-    let template = "";
+    let html = "";
     products.forEach(product => {
-        template += createHTMLProducts(product);
+        html += createHTMLProducts(product);
     });
 
-    productsContainer.innerHTML += template;
+    productsContainer.innerHTML += html;
+}
+
+
+//Single product page
+
+function loadSingleProductPage(){
+    const params = new URLSearchParams(window.location.search);
+    const productId = params.get("id");
+    let productContainer = document.getElementById("product-container");
+
+    fetchProductById(productId).then(product => {
+        productContainer.innerHTML += createHTMLSingleProduct(product);
+    });
 }
 
 
 //Shopping cart-page
 
-function loadCart(){
+function loadCartPage(){
     let cart = JSON.parse(localStorage.getItem("cart")) || [];
     let cartElement = document.getElementById("shopping-cart");
 
@@ -116,17 +129,26 @@ function loadCart(){
     
     cart.forEach(product => {
         cartElement.innerHTML += createHTMLCartProduct(product);
-        document.getElementById(`total-for-product-${product.id}`).textContent = "Total: " + 
-        (parseFloat(product.price) * parseFloat(product.quantity)).toFixed(2) + " $";
+        document.getElementById(`total-for-product-${product.id}`).textContent = "Total: " + (parseFloat(product.price) * parseFloat(product.quantity)).toFixed(2) + " $";
         currentTotal+= parseFloat(product.price) * parseFloat(product.quantity);
     });
 
     document.getElementById("total").textContent = currentTotal.toFixed(2) + "$";
 }
 
+// Shopping cart functions
+
+function getCartInStorage(){
+    return JSON.parse(localStorage.getItem("cart")) || [];
+}
+
+function getProductFromCart(cart, id){
+    return cart.find(product => product.id === id);
+}
+
 function addToStorage(id, title, price, image, quantity) {
-    let cart = JSON.parse(localStorage.getItem("cart")) || [];
-    let existingProduct = cart.find(product => product.id === id);
+    let cart = getCartInStorage();
+    let existingProduct = getProductFromCart(cart, id);
     
     if (existingProduct) {
         existingProduct.quantity += quantity;
@@ -139,61 +161,37 @@ function addToStorage(id, title, price, image, quantity) {
     updateCart();
 }
 
+function quantityPlus(id){
 
-function quantityPlus(event){
-    let clickedButton = event.target;
-    let productId = clickedButton.getAttribute("data-id");
-    let cart = JSON.parse(localStorage.getItem("cart")) || [];
-    let productToUpdate = cart.find(product => product.id == productId);
+    let cart = getCartInStorage();
+    let existingProduct = getProductFromCart(cart, id);
     
-    if (productToUpdate) {
-        productToUpdate.quantity += 1;
+    if (existingProduct) {
+        existingProduct.quantity += 1;
         localStorage.setItem("cart", JSON.stringify(cart));
         updateCart();
     }
 }
 
-function quantityMinus(event){
-    let clickedButton = event.target;
-    let productId = clickedButton.getAttribute("data-id");
-    let cart = JSON.parse(localStorage.getItem("cart")) || [];
-    let productToUpdate = cart.find(product => product.id == productId);
+function quantityMinus(id){
+
+    let cart = getCartInStorage();
+    let existingProduct = getProductFromCart(cart, id);
     
-    if (productToUpdate) {
-        if (productToUpdate.quantity > 1) {
-            productToUpdate.quantity -= 1;
-            localStorage.setItem("cart", JSON.stringify(cart));
+    if (existingProduct) {
+        if (existingProduct.quantity > 1) {
+            existingProduct.quantity -= 1;
         } else {
-            cart = cart.filter(product => product.id != productId);
-            localStorage.setItem("cart", JSON.stringify(cart));
+            cart = cart.filter(product => product.id != existingProduct.id);
         }
+        localStorage.setItem("cart", JSON.stringify(cart));
         updateCart();
     }
 }
 
-function removeFromCart(productId){
-    let cart = JSON.parse(localStorage.getItem("cart")) || [];
-    cart = cart.filter(product => product.id !== productId);
-    localStorage.setItem("cart", JSON.stringify(cart));
 
-    updateCart();
-}
-
-
-//Single product page
-document.addEventListener("DOMContentLoaded", function() {
-    const params = new URLSearchParams(window.location.search);
-    const productId = params.get("id");
-    let productContainer = document.getElementById("product-container");
-
-    fetchProductById(productId).then(product => {
-        productContainer.innerHTML += createHTMLSingleProductPage(product);
-    });
-
-});
-
-function updateCartCount(){
-    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+function updateNavbarCartCount(){
+    let cart = getCartInStorage();
     let count = 0;
 
     cart.forEach(product => {
@@ -205,6 +203,6 @@ function updateCartCount(){
 }
 
 function updateCart(){
-    updateCartCount();
-    loadCart();
+    updateNavbarCartCount();
+    loadCartPage();
 }
