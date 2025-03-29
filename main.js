@@ -96,13 +96,17 @@ async function loadProducts(){
     let productsContainer = document.getElementById("products");
     const products = await fetchProducts();
 
+    let template = "";
     products.forEach(product => {
-        productsContainer.innerHTML += createHTMLProducts(product);
+        template += createHTMLProducts(product);
     });
+
+    productsContainer.innerHTML += template;
 }
 
 
 //Shopping cart-page
+
 function loadCart(){
     let cart = JSON.parse(localStorage.getItem("cart")) || [];
     let cartElement = document.getElementById("shopping-cart");
